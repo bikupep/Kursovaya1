@@ -1,0 +1,86 @@
+import random  # Импорт модуля для работы с генерацией случайных чисел
+import time    # Импорт модуля для работы с временем
+
+# Определение класса Fighter, представляющего бойца
+class Fighter:
+    
+    def __init__(self, name: str, health: float, damage: list[float], attack_speed: list[float]):
+        """
+        Конструктор класса Fighter.
+        
+        Параметры:
+        name (str): Имя бойца.
+        health (float): Количество здоровья бойца.
+        damage (list[float]): Диапазон возможного урона бойца [min, max].
+        attack_speed (list[float]): Диапазон времени между атаками [min, max].
+        """
+        self.name = name
+        self.health = health
+        self.damage = damage
+        self.attack_speed = attack_speed
+
+    def being_damaged(self):
+        """
+        Метод для нанесения урона бойцу.
+        Генерирует случайное значение урона в пределах заданного диапазона damage.
+        Уменьшает здоровье бойца на полученное значение.
+        
+        Возвращает:
+        float: Значение нанесённого урона.
+        """
+        damage_has_been = random.uniform(self.damage[0], self.damage[1])  # Случайное число урона в диапазоне damage
+        self.health -= damage_has_been  # Уменьшение здоровья бойца
+        return damage_has_been          # Возвращение значения нанесённого урона
+
+# Функция для проведения боя между двумя бойцами
+def combat(first_fighter: Fighter, second_fighter: Fighter):
+    """
+    Функция для моделирования сражения между двумя бойцами.
+    
+    Параметры:
+    first_fighter (Fighter): Первый боец.
+    second_fighter (Fighter): Второй боец.
+    
+    Результат:
+    Записывает ход сражения, включая нанесённый урон, остаток здоровья и победителя, в файл logger.txt.
+    """
+    with open("logger.txt", "w") as log_file:  # Открытие файла для записи логов боя
+        while first_fighter.health > 0 and second_fighter.health > 0:  # Цикл продолжается, пока оба бойца живы
+            
+            # Атака первого бойца
+            time.sleep(random.uniform(first_fighter.attack_speed[0], first_fighter.attack_speed[1]))  # Задержка перед атакой
+            damage = first_fighter.being_damaged()  # Первый боец наносит урон
+            log_file.write(f"{first_fighter.name} deals {damage:.2f} damage to {second_fighter.name}. "
+                           f"{second_fighter.name} has {second_fighter.health:.2f} health left.\n")  # Логирование действия
+            
+            if second_fighter.health <= 0:  # Проверка, если второй боец погиб
+                break
+            
+            # Атака второго бойца
+            time.sleep(random.uniform(second_fighter.attack_speed[0], second_fighter.attack_speed[1]))  # Задержка перед атакой
+            damage = second_fighter.being_damaged()  # Второй боец наносит урон
+            log_file.write(f"{second_fighter.name} deals {damage:.2f} damage to {first_fighter.name}. "
+                           f"{first_fighter.name} has {first_fighter.health:.2f} health left.\n")  # Логирование действия
+
+        # Определение победителя и запись результата
+        if first_fighter.health > 0:
+            log_file.write(f"{first_fighter.name} has won the battle!\n")
+        else:
+            log_file.write(f"{second_fighter.name} has won the battle!\n")
+
+# Точка начала выполнения программы
+start_time = time.time()  # Фиксация времени начала выполнения программы
+
+# Создание двух бойцов
+fighter1 = Fighter("Fighter 1", 100, [10, 20], [1, 2])
+fighter2 = Fighter("Fighter 2", 100, [10, 20], [1, 2])
+
+# Запуск функции боя между бойцами
+combat(fighter1, fighter2)
+
+end_time = time.time()  # Фиксация времени завершения выполнения программы
+execution_time = end_time - start_time  # Вычисление времени выполнения
+
+# Запись времени длительности боя в лог-файл
+with open("logger.txt", "a") as log_file:  # Открытие файла для дозаписи
+    log_file.write(f"The battle lasted {execution_time:.2f} seconds.\n")
